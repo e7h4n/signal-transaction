@@ -1,6 +1,6 @@
 {
   "name": "signal-transaction",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This library simplifies handling tasks that might need to be canceled or rolled back, giving you fine-grained control over complex workflows.",
   "repository": {
     "type": "git",
@@ -8,13 +8,11 @@
   },
   "license": "MIT",
   "keywords": [
-    "setTimeout",
-    "setInterval",
-    "delay",
-    "requestAnimationFrame",
     "AbortController",
     "AbortSignal",
-    "abortable"
+    "cancelation",
+    "async",
+    "async flow"
   ],
   "scripts": {
     "lint": "eslint .",
