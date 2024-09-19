@@ -10,7 +10,7 @@ interface Transaction {
 }
 
 export function transaction(signal: AbortSignal): Transaction {
-    let txnCtrl = new AbortController()
+    const cleanupFns: ActionRollback[] = []
 
     function act(action: Action): void {
         signal.throwIfAborted()
@@ -18,13 +18,15 @@ export function transaction(signal: AbortSignal): Transaction {
         const cleanup = action()
 
         if (cleanup) {
-            signal.addEventListener('abort', cleanup, { signal: txnCtrl.signal })
+            signal.addEventListener('abort', cleanup)
+            cleanupFns.push(cleanup)
         }
     }
 
     function finish(action?: Action) {
-        txnCtrl.abort()
-        txnCtrl = new AbortController()
+        for (const fn of cleanupFns) {
+            signal.removeEventListener('abort', fn)
+        }
 
         if (!action) {
             return;
