@@ -1,6 +1,6 @@
 # AbortSignal based Transaction Utils
 
-[![CI](https://github.com/e7h4n/signal-transaction/actions/workflows/ci.yaml/badge.svg)](https://github.com/e7h4n/signal-transaction/actions/workflows/ci.yaml) [![Coverage Status](https://coveralls.io/repos/github/e7h4n/signal-transaction/badge.svg?branch=coveralls)](https://coveralls.io/github/e7h4n/signal-transaction?branch=coveralls) ![NPM Version](https://img.shields.io/npm/v/signal-transaction) [![Maintainability](https://api.codeclimate.com/v1/badges/a0b68839fea9c990a3eb/maintainability)](https://codeclimate.com/github/e7h4n/signal-transaction/maintainability)
+[![CI](https://github.com/e7h4n/signal-transaction/actions/workflows/ci.yaml/badge.svg)](https://github.com/e7h4n/signal-transaction/actions/workflows/ci.yaml) [![Coverage Status](https://coveralls.io/repos/github/e7h4n/signal-transaction/badge.svg?branch=coveralls)](https://coveralls.io/github/e7h4n/signal-transaction?branch=coveralls) ![NPM Version](https://img.shields.io/npm/v/signal-transaction) [![Maintainability](https://api.codeclimate.com/v1/badges/b3b1d4e4fb96c3ac5023/maintainability)](https://codeclimate.com/github/e7h4n/signal-transaction/maintainability)
 
 `signal-transaction` is a lightweight utility designed to manage actions within a transactional scope. It ensures that if an `AbortSignal` is triggered, all registered rollback actions are executed, providing a clean, transaction-like flow for async operations.
 
