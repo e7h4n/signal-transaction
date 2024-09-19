@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: |
+            - args: [--frozen-lockfile, --strict-peer-dependencies]
+
+      - name: "Run lint"
+        run: pnpm lint
+
+      - name: Run tests
+        run: pnpm coverage
+
+      - name: "Report Coverage"
+        uses: davelosert/vitest-coverage-report-action@v2
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage/cobertura-coverage.xml
+          format: cobertura
+          fail-on-error: true
