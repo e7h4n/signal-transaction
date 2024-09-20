@@ -1,6 +1,6 @@
 {
   "name": "signal-transaction",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "This library simplifies handling tasks that might need to be canceled or rolled back, giving you fine-grained control over complex workflows.",
   "repository": {
     "type": "git",
@@ -46,5 +46,10 @@
     "dist"
   ],
   "main": "./dist/signal-transaction.cjs",
-  "module": "./dist/signal-transaction.js"
+  "exports": {
+    ".": {
+      "require": "./dist/signal-transaction.cjs",
+      "import": "./dist/signal-transaction.js"
+    }
+  }
 }
