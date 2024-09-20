@@ -1,33 +1,37 @@
-import { Action, ActionRollback, Transaction } from "../types/transaction"
+import { ActionRollback, Transaction, TransactionAction, TransactionFinish } from "../types/transaction"
 
-export function transaction(signal: AbortSignal): Transaction {
-    const cleanupFns: ActionRollback[] = []
+class TransactionImpl implements Transaction {
+    private readonly cleanupFns: ActionRollback[] = []
 
-    function act(action: Action): void {
-        signal.throwIfAborted()
+    constructor(private readonly signal: AbortSignal) {
+
+    }
+
+    act: TransactionAction = (action) => {
+        this.signal.throwIfAborted()
 
         const cleanup = action()
 
         if (cleanup) {
-            signal.addEventListener('abort', cleanup)
-            cleanupFns.push(cleanup)
+            this.signal.addEventListener('abort', cleanup)
+            this.cleanupFns.push(cleanup)
         }
     }
 
-    function finish(action?: Action) {
-        for (const fn of cleanupFns) {
-            signal.removeEventListener('abort', fn)
+    finish: TransactionFinish = (action) => {
+        for (const fn of this.cleanupFns) {
+            this.signal.removeEventListener('abort', fn)
         }
+        this.cleanupFns.length = 0
 
         if (!action) {
             return;
         }
 
-        act(action)
+        this.act(action)
     }
+}
 
-    return {
-        act,
-        finish,
-    }
+export function transaction(signal: AbortSignal): Transaction {
+    return new TransactionImpl(signal)
 }
