@@ -280,7 +280,9 @@ const signalSwitch = createSignalSwitch(controller.signal);
 // A sample loader function using signalSwitch
 const fetchDataLoader = signalSwitch(async (signal, { params }) => {
     const response = await fetch(`/api/data/${params.id}`, { signal });
-    return await response.json();
+    const data = await response.json();
+    signal.throwIfAbort()
+    return data;
 });
 
 // A simple component that fetches data and displays it
