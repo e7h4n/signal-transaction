@@ -46,4 +46,30 @@ describe('signalSwitch', () => {
         ctrl.abort()
         expect(trace).toBeCalled()
     })
+
+    test('should pass the signal through by default if no function is provided', () => {
+        const ctrl = new AbortController()
+        const trace = vi.fn()
+        const signalSwitch = createSignalSwitch(ctrl.signal)()
+        const signal = signalSwitch()
+        signal.addEventListener('abort', trace)
+        signalSwitch()
+        expect(trace).toBeCalled()
+    })
+
+    test('signalSwitch should accpect correctly types', () => {
+        const ctrl = new AbortController()
+        const trace = vi.fn()
+
+        const signalSwitch = createSignalSwitch(ctrl.signal)
+
+        const fn = signalSwitch((signal, a: number, b: string, c: boolean) => {
+            trace(a, b, c)
+            signal.addEventListener('abort', trace)
+        })
+
+        fn(1, '1', true)
+        ctrl.abort()
+        expect(trace).toBeCalled()
+    })
 })

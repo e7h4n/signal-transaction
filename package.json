@@ -1,6 +1,6 @@
 {
   "name": "signal-transaction",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "This library simplifies handling tasks that might need to be canceled or rolled back, giving you fine-grained control over complex workflows.",
   "repository": {
     "type": "git",

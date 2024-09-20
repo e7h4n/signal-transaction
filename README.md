@@ -127,6 +127,8 @@ Creates a transaction object to manage your actions and rollbacks.
 - **`finish(action?: Action)`**  
   Completes the transaction and optionally executes a final action. All registered rollback callbacks are removed afterward, ensuring that no additional cleanups occur after the transaction is finished.
 
+- **`createSignalSwitch`** is a utility that manages multiple abortable tasks by ensuring only the latest task remains active. When a new task is started, it automatically cancels the previous one. This is particularly useful in scenarios where you need to manage consecutive asynchronous operations, such as user interactions or page navigation.
+
 ### Types
 
 - **`Action`**  
@@ -134,6 +136,9 @@ Creates a transaction object to manage your actions and rollbacks.
 
 - **`ActionRollback`**  
   A function to be executed if the `AbortSignal` is triggered (typically a cleanup function).
+
+- **`SignalSwitch`**  
+  A function that takes a task function as an argument. The task function receives an `AbortSignal` and optional additional arguments. Only one task can remain active at a time, and previous tasks will be aborted when a new task is started.
 
 ## More Examples
 
