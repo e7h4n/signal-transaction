@@ -54,13 +54,64 @@ finish(() => {
 });
 ```
 
-### Aborting a Transaction
-
 You can abort the transaction by calling `controller.abort()`. This triggers all rollback actions tied to the transaction.
 
 ```ts
 controller.abort(); // All rollback actions will be triggered
 ```
+
+### Signal Switch
+
+`createSignalSwitch` creates a mechanism to manage multiple abortable tasks. When a new task is started, it automatically cancels (aborts) any previous task associated with it. This is useful when you want to ensure only the most recent operation is active, while canceling any outdated tasks.
+
+#### Example: Switching Between Tasks
+
+Imagine you're working on a UI where users can select different tasks to run. You want to ensure that only the latest selected task is active, and all previously selected tasks are canceled.
+
+```ts
+import { createSignalSwitch, act } from 'signal-transaction';
+
+const controller = new AbortController();
+const signalSwitch = createSignalSwitch(controller.signal);
+
+// Simulate a task that changes based on user input
+let currentTaskId = 0;
+
+const runTask = signalSwitch((signal) => {
+    const { act } = transaction(signal)
+    act(() => {
+        const taskId = currentTaskId++;
+        console.log(`Task ${taskId} started`);
+
+        return () => {
+            // If the task is aborted, log the cancellation
+            console.log(`Task ${taskId} aborted`);
+        }
+    })
+});
+
+// Start the first task
+runTask();
+// Output: Task 0 started
+
+// Switch to a new task, automatically aborting the previous one
+runTask();
+// Output: Task 0 aborted
+//         Task 1 started
+
+// Start another task, aborting the second one
+runTask();
+// Output: Task 1 aborted
+//         Task 2 started
+
+// Externally abort all tasks by calling controller.abort()
+controller.abort();
+// Output: Task 2 aborted
+```
+
+In this scenario:
+- Every time `runTask()` is called, it starts a new task and aborts the previous one.
+- If the user aborts the tasks externally using `controller.abort()`, the current task will be aborted regardless of its state.
 
 ## API Reference
 
@@ -84,7 +135,7 @@ Creates a transaction object to manage your actions and rollbacks.
 - **`ActionRollback`**  
   A function to be executed if the `AbortSignal` is triggered (typically a cleanup function).
 
-## Examples
+## More Examples
 
 ### Example: Managing Points with Rollback
 
@@ -213,6 +264,58 @@ controller.abort();
 // Output:
 // Cleanup: Dismantle the kitchen
 ```
+
+### Example: Using `signalSwitch` with React-Router Loaders
+
+When navigating between pages in a React application using React-Router, it's useful to cancel ongoing requests to prevent memory leaks or unwanted side effects. By using `signalSwitch`, we can automatically manage the `AbortSignal` for each page's loader method, ensuring that the signal for the previous page is aborted when the user navigates to a new page.
+
+```tsx
+import React from 'react';
+import { createBrowserRouter, RouterProvider, useLoaderData } from 'react-router-dom';
+import { createSignalSwitch } from 'signal-transaction';
+
+const controller = new AbortController();
+const signalSwitch = createSignalSwitch(controller.signal);
+
+// A sample loader function using signalSwitch
+const fetchDataLoader = signalSwitch(async (signal, { params }) => {
+    const response = await fetch(`/api/data/${params.id}`, { signal });
+    return await response.json();
+});
+
+// A simple component that fetches data and displays it
+const DataPage = () => {
+    const data = useLoaderData();
+    return (
+        <div>
+            <h1>Data for this page</h1>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+        </div>
+    );
+};
+
+// Define routes with loaders
+const router = createBrowserRouter([
+    {
+        path: '/data/:id',
+        element: <DataPage />,
+        loader: fetchDataLoader,
+    },
+]);
+
+// App component rendering the Router
+const App = () => (
+    <RouterProvider router={router} />
+);
+
+export default App;
+```
+
+- **`createSignalSwitch`** is used to wrap the loader function, ensuring that each page load request gets its own `AbortSignal`.
+- When the user navigates to a new page, the previous request is automatically aborted, thanks to `signalSwitch`.
+- **React-Router's `loader`** method automatically provides parameters like `params` to the loader function, and the signal passed ensures that navigation between pages is efficient and clean.
+
+In this example, when the user navigates from one data page to another, the ongoing fetch request for the first page is canceled, preventing unnecessary resource usage.
 
 ## License
 

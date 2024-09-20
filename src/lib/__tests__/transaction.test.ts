@@ -1,6 +1,6 @@
 import { delay } from 'signal-timers'
 import { describe, expect, test } from "vitest"
-import { transaction } from '..'
+import { transaction } from '../transaction'
 
 describe('transaction.act', () => {
     test('act Registers Action and Rollback', async () => {
