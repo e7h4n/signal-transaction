@@ -38,7 +38,7 @@ const controller = new AbortController();
 const signal = controller.signal;
 
 // Initialize the transaction
-const { act, finish } = transaction(signal);
+const { act } = transaction(signal);
 
 // Define an action with an optional rollback
 act(() => {
@@ -46,11 +46,6 @@ act(() => {
     return () => {
         console.log('Action 1 rolled back');
     };
-});
-
-// Use finish to finalize the transaction or run a final action
-finish(() => {
-    console.log('Final action executed');
 });
 ```
 
@@ -123,9 +118,6 @@ Creates a transaction object to manage your actions and rollbacks.
 
 - **`act(action: Action)`**  
   Executes the action if the signal is not aborted. If a rollback function is returned, it is bound to the abort event.
-
-- **`finish(action?: Action)`**  
-  Completes the transaction and optionally executes a final action. All registered rollback callbacks are removed afterward, ensuring that no additional cleanups occur after the transaction is finished.
 
 - **`createSignalSwitch`** is a utility that manages multiple abortable tasks by ensuring only the latest task remains active. When a new task is started, it automatically cancels the previous one. This is particularly useful in scenarios where you need to manage consecutive asynchronous operations, such as user interactions or page navigation.
 
@@ -224,50 +216,6 @@ controller.abort();
 // Name reset: 
 // Class reset: 
 // Equipment reset: []
-```
-
-### Example: Finalizing with `finish()` and Handling Aborts
-
-`finish()` allows you to finalize a transaction without triggering previously registered rollback functions. Instead of executing all the previous rollbacks, `finish()` simply removes them from the `AbortSignal`'s listeners and registers a new rollback function, if provided.
-
-```ts
-import { transaction } from 'signal-transaction';
-
-const controller = new AbortController();
-const signal = controller.signal;
-const { act, finish } = transaction(signal);
-
-const cleanupLog = (task) => {
-    console.log(`Cleaning up after: ${task}`);
-};
-
-// Add multiple tasks with rollback
-act(() => {
-    console.log('Task 1: Prepare the ingredients');
-    return () => cleanupLog('Prepare the ingredients');
-});
-
-act(() => {
-    console.log('Task 2: Cook the meal');
-    return () => cleanupLog('Cook the meal');
-});
-
-// Finalize the transaction, cleaning up old rollbacks and registering a new one
-finish(() => {
-    console.log('Task complete: Serve the meal');
-    return () => {
-        console.log('Cleanup: Dismantle the kitchen');
-    };
-});
-
-// Output:
-// Task 1: Prepare the ingredients
-// Task 2: Cook the meal
-// Task complete: Serve the meal
-
-controller.abort(); 
-// Output:
-// Cleanup: Dismantle the kitchen
 ```
 
 ### Example: Using `signalSwitch` with React-Router Loaders
